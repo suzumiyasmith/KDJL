@@ -43,18 +43,18 @@ moveRamdonElemtes :: ([a], [a]) -> IO ([a], [a])
 moveRamdonElemtes (ss, as@(_ : _)) =
   fmap (\x -> takeN x as) $ randomRIO (0,length as - 1)
     where takeN n = (\(xs, (y : ys)) -> ((y : ss), xs ++ ys)) . (splitAt n)
-moveRamdonElemtes (ss, []) = pure (ss, [])
+moveRamdonElemtes (ss, []) = return (ss, [])
 
 -- | shuffle a deck by the global RandomGEN
 shuffle :: [a] -> IO [a]
 shuffle as = fmap fst $ shuffle' ([], as)
   where
     shuffle' (ss, as@(_ : _)) = moveRamdonElemtes (ss,as) >>= shuffle'
-    shuffle' (ss, []        ) = pure (ss,[])
+    shuffle' (ss, []        ) = return (ss,[])
 
 -- | split a list into given parts, generic splitAt
 multiSplit :: [Int] -> [a] -> [[a]]
-multiSplit (s:ss) as = (splitAt s as) : (multiSplit ss as)
+multiSplit (s:ss) as = (fst $ splitAt s as) : (multiSplit ss (snd $ splitAt s as))
 multiSplit []  as   = [as]
 
 -- | Generate a EOBoard whose state is the start of the 8-off
